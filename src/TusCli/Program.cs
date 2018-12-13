@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
@@ -42,12 +42,11 @@ namespace TusCli
             var client = new TusClient();
             client.Uploading += OnUploadProgress;
             
-            WriteLine("Starting upload.");
+            WriteLine("Uploading...");
 
-            var fileUrl = client.Create(Address, file);
+            var fileUrl = client.Create(Address, file, metadata);
             client.Upload(fileUrl, file);
             
-            WriteLine("Upload done.");            
             return 0;
         }
 
