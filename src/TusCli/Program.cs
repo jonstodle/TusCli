@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Threading.Tasks;
@@ -43,7 +43,7 @@ namespace TusCli
         private void OnUploadProgress(long bytesTransferred, long bytesTotal)
         {
             var progress = (bytesTransferred / (double)bytesTotal) * 100;
-            WriteLine($"{progress}%");
+            WriteLine($"{progress:0.00}%");
         }
     }
 }
