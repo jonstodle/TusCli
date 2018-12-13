@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using McMaster.Extensions.CommandLineUtils;
 using static System.Console;
@@ -18,6 +20,9 @@ namespace TusCli
         [Argument(1, "Address to upload the file to")]
         [Required]
         public string Address { get; }
+        
+        [Option(Description = "Additional metadata to submit. Format: 'url-encoded-formdata', eg. key1=value1&key2=value2")]
+        public string Metadata { get; }
 
         public int OnExecute()
         {
@@ -27,6 +32,12 @@ namespace TusCli
                 Error.WriteLine($"Could not find file '{file.FullName}'.");
                 return 1;
             }
+
+            var metadata = Metadata?
+                .Split('&')
+                .ToDictionary(
+                    s => s.Split('=')[0],
+                    s => s.Split('=')[1]);
             
             var client = new TusClient();
             client.Uploading += OnUploadProgress;
