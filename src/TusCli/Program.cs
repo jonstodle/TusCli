@@ -12,15 +12,15 @@ namespace TusCli
     class Program
     {
         static void Main(string[] args) => CommandLineApplication.Execute<Program>(args);
-        
+
         [Argument(0, "file", "File to upload")]
         [Required]
         public string FilePath { get; }
-        
+
         [Argument(1, "Address to upload the file to")]
         [Required]
         public string Address { get; }
-        
+
         [Option(Description = "Additional metadata to submit. Format: key1=value1,key2=value2")]
         public string Metadata { get; }
 
@@ -38,11 +38,11 @@ namespace TusCli
                 .ToDictionary(
                     s => s.Split('=')[0],
                     s => s.Split('=')[1]);
-            
+
             var client = new TusClient();
             client.Uploading += OnUploadProgress;
-            
-            WriteLine("Uploading...");
+
+            OnUploadProgress(0, 1);
 
             try
             {
@@ -51,17 +51,26 @@ namespace TusCli
             }
             catch (Exception e)
             {
+                WriteLine();
                 Error.WriteLine($"Operation failed with message: '{e.Message}'");
                 return 2;
             }
-            
+
             return 0;
         }
 
         private void OnUploadProgress(long bytesTransferred, long bytesTotal)
         {
-            var progress = (bytesTransferred / (double)bytesTotal) * 100;
-            WriteLine($"{progress:0.00}%");
+            var progress = (bytesTransferred / (double) bytesTotal);
+            var percentString = $"{progress * 100:0.00}%".PadRight(8);
+            var progressBarMaxWidth = BufferWidth - percentString.Length - 2;
+            var progressBar = Enumerable.Range(0, (int) Math.Round(progressBarMaxWidth * progress))
+                .Select(_ => '=')
+                .ToArray();
+            if (progress < 1 && progressBar.Length > 0)
+                progressBar[progressBar.Length - 1] = '>';
+            SetCursorPosition(0, CursorTop);
+            Write($"{percentString}[{string.Join("", progressBar).PadRight(progressBarMaxWidth)}]");
         }
     }
 }
