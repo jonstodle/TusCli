@@ -44,8 +44,16 @@ namespace TusCli
             
             WriteLine("Uploading...");
 
-            var fileUrl = client.Create(Address, file, metadata);
-            client.Upload(fileUrl, file);
+            try
+            {
+                var fileUrl = client.Create(Address, file, metadata);
+                client.Upload(fileUrl, file);
+            }
+            catch (Exception e)
+            {
+                Error.WriteLine($"Operation failed with message: '{e.Message}'");
+                return 2;
+            }
             
             return 0;
         }
