@@ -21,7 +21,7 @@ namespace TusCli
         [Required]
         public string Address { get; }
         
-        [Option(Description = "Additional metadata to submit. Format: 'url-encoded-formdata', eg. key1=value1&key2=value2")]
+        [Option(Description = "Additional metadata to submit. Format: key1=value1,key2=value2")]
         public string Metadata { get; }
 
         public int OnExecute()
@@ -34,7 +34,7 @@ namespace TusCli
             }
 
             var metadata = Metadata?
-                .Split('&')
+                .Split(',')
                 .ToDictionary(
                     s => s.Split('=')[0],
                     s => s.Split('=')[1]);
