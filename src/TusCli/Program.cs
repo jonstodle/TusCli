@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using McMaster.Extensions.CommandLineUtils;
+using TusDotNetClient;
 using static System.Console;
 
 namespace TusCli
@@ -35,14 +34,15 @@ namespace TusCli
 
             var metadata = Metadata?
                 .Split(',')
-                .ToDictionary(
-                    s => s.Split('=')[0],
-                    s => s.Split('=')[1]);
+                .Select(md =>
+                {
+                    var parts = md.Split('=');
+                    return (parts[0], parts[1]);
+                })
+                .ToArray();
 
             var client = new TusClient();
-            client.Uploading += OnUploadProgress;
-
-            OnUploadProgress(0, 1);
+            client.UploadProgress += OnUploadProgress;
 
             try
             {
