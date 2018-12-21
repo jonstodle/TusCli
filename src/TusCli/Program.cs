@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
@@ -12,16 +12,18 @@ namespace TusCli
     {
         static void Main(string[] args) => CommandLineApplication.Execute<Program>(args);
 
+        // ReSharper disable UnassignedGetOnlyAutoProperty
         [Argument(0, "file", "File to upload")]
         [Required]
         public string FilePath { get; }
 
-        [Argument(1, "Address to upload the file to")]
+        [Argument(1, "address", "The endpoint of the Tus server")]
         [Required]
         public string Address { get; }
 
         [Option(Description = "Additional metadata to submit. Format: key1=value1,key2=value2")]
         public string Metadata { get; }
+        // ReSharper restore UnassignedGetOnlyAutoProperty
 
         public int OnExecute()
         {
