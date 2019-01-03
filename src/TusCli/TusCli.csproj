@@ -3,9 +3,14 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>netcoreapp2.1</TargetFramework>
-        <VersionPrefix>0.1.0</VersionPrefix>
         <PackAsTool>true</PackAsTool>
         <ToolCommandName>tus</ToolCommandName>
+        <PackageId>TusCli</PackageId>
+        <Authors>jonindico</Authors>
+        <Description>A cli tool for interacting with a Tus enabled server.</Description>
+        <RepositoryUrl>https://github.com/Jon-Indico/TusCli</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/Jon-Indico/TusCli</PackageProjectUrl>
+        <License>MIT</License>
     </PropertyGroup>
 
     <ItemGroup>
