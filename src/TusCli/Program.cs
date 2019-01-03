@@ -41,7 +41,7 @@ namespace TusCli
                     var parts = md.Split('=');
                     return (parts[0], parts[1]);
                 })
-                .ToArray();
+                .ToArray() ?? Array.Empty<(string, string)>();
 
             var client = new TusClient();
             client.UploadProgress += OnUploadProgress;
