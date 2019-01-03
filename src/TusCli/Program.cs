@@ -63,7 +63,7 @@ namespace TusCli
 
         private void OnUploadProgress(long bytesTransferred, long bytesTotal)
         {
-            var progress = (bytesTransferred / (double) bytesTotal);
+            var progress = bytesTransferred / (double) bytesTotal;
             var percentString = $"{progress * 100:0.00}%".PadRight(8);
             var progressBarMaxWidth = BufferWidth - percentString.Length - 2;
             var progressBar = Enumerable.Range(0, (int) Math.Round(progressBarMaxWidth * progress))
