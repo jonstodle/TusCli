@@ -34,22 +34,50 @@ namespace TusCli
                 return 1;
             }
 
+            var infoFile = new FileInfo($"{file.FullName}.info");
+            var fileInformationString = "";
+            try
+            {
+                fileInformationString = File.ReadAllText(infoFile.FullName);
+            }
+            catch
+            {
+                // ignored
+            }
+
+            var fileInformation = FileInformation.Parse(fileInformationString);
+
             var metadata = Metadata?
-                .Split(',')
-                .Select(md =>
-                {
-                    var parts = md.Split('=');
-                    return (parts[0], parts[1]);
-                })
-                .ToArray() ?? Array.Empty<(string, string)>();
+                               .Split(',')
+                               .Select(md =>
+                               {
+                                   var parts = md.Split('=');
+                                   return (parts[0], parts[1]);
+                               })
+                               .ToArray() ?? Array.Empty<(string, string)>();
 
             var client = new TusClient();
             client.UploadProgress += OnUploadProgress;
 
             try
             {
-                var fileUrl = client.Create(Address, file, metadata);
+                var fileUrl = $"{Address}{fileInformation.ServerId}";
+                if (string.IsNullOrWhiteSpace(fileInformation.ServerId))
+                {
+                    fileUrl = client.Create(Address, file, metadata);
+                    fileInformation.ServerId = fileUrl.Split('/').Last();
+                }
+
+                File.WriteAllText(infoFile.FullName, fileInformation.ToString());
                 client.Upload(fileUrl, file);
+                try
+                {
+                    infoFile.Delete();
+                }
+                catch
+                {
+                    // ignored
+                }
             }
             catch (Exception e)
             {
