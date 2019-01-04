@@ -10,7 +10,7 @@ namespace TusCli
 {
     class Program
     {
-        static void Main(string[] args) => CommandLineApplication.Execute<Program>(args);
+        private static void Main(string[] args) => CommandLineApplication.Execute<Program>(args);
 
         // ReSharper disable UnassignedGetOnlyAutoProperty
         [Argument(0, "file", "File to upload")]
@@ -35,26 +35,9 @@ namespace TusCli
             }
 
             var infoFile = new FileInfo($"{file.FullName}.info");
-            var fileInformationString = "";
-            try
-            {
-                fileInformationString = File.ReadAllText(infoFile.FullName);
-            }
-            catch
-            {
-                // ignored
-            }
+            var fileInformation = FileInformation.Parse(TryReadAllText(infoFile.FullName) ?? "");
 
-            var fileInformation = FileInformation.Parse(fileInformationString);
-
-            var metadata = Metadata?
-                               .Split(',')
-                               .Select(md =>
-                               {
-                                   var parts = md.Split('=');
-                                   return (parts[0], parts[1]);
-                               })
-                               .ToArray() ?? Array.Empty<(string, string)>();
+            var metadata = ParseMetadata(Metadata) ?? Array.Empty<(string, string)>();
 
             var client = new TusClient();
             client.UploadProgress += OnUploadProgress;
@@ -69,7 +52,9 @@ namespace TusCli
                 }
 
                 File.WriteAllText(infoFile.FullName, fileInformation.ToString());
+                
                 client.Upload(fileUrl, file);
+                
                 try
                 {
                     infoFile.Delete();
@@ -102,5 +87,27 @@ namespace TusCli
             SetCursorPosition(0, CursorTop);
             Write($"{percentString}[{string.Join("", progressBar).PadRight(progressBarMaxWidth)}]");
         }
+
+        private static string TryReadAllText(string path)
+        {
+            try
+            {
+                return File.ReadAllText(path);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static (string, string)[] ParseMetadata(string metadata) =>
+            metadata?
+                .Split(',')
+                .Select(md =>
+                {
+                    var parts = md.Split('=');
+                    return (parts[0], parts[1]);
+                })
+                .ToArray();
     }
 }
