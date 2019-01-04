@@ -8,6 +8,7 @@ using static System.Console;
 
 namespace TusCli
 {
+    [Command("tus", Description = "A cli tool for interacting with a Tus enabled server.")]
     class Program
     {
         private static void Main(string[] args) => CommandLineApplication.Execute<Program>(args);
