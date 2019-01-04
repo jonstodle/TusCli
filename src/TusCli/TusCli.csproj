@@ -15,7 +15,7 @@
 
     <ItemGroup>
       <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.2.5" />
-      <PackageReference Include="TusDotNetClient" Version="0.1.1" />
+      <PackageReference Include="TusDotNetClient" Version="0.1.2" />
     </ItemGroup>
 
 </Project>
