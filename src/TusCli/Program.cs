@@ -24,6 +24,9 @@ namespace TusCli
 
         [Option(Description = "Additional metadata to submit. Format: key1=value1,key2=value2")]
         public string Metadata { get; }
+
+        [Option(Description = "The size (in MB) of each chunk when uploading (default: 5)")]
+        public double ChunkSize { get; } = 5;
         // ReSharper restore UnassignedGetOnlyAutoProperty
 
         public int OnExecute()
@@ -40,7 +43,7 @@ namespace TusCli
 
             var metadata = ParseMetadata(Metadata) ?? Array.Empty<(string, string)>();
 
-            var client = new TusClient();
+            var client = new TusClient(ChunkSize);
             client.UploadProgress += OnUploadProgress;
 
             try

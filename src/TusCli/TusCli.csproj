@@ -12,7 +12,7 @@
         <License>MIT</License>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.2.5"/>
-        <PackageReference Include="TusDotNetClient" Version="0.1.2"/>
+        <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.2.5" />
+        <PackageReference Include="TusDotNetClient" Version="0.2.0" />
     </ItemGroup>
 </Project>
