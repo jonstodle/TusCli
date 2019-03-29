@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using McMaster.Extensions.CommandLineUtils;
 using TusDotNetClient;
 using static System.Console;
@@ -11,7 +12,7 @@ namespace TusCli
     [Command("tus", Description = "A cli tool for interacting with a Tus enabled server.")]
     class Program
     {
-        private static void Main(string[] args) => CommandLineApplication.Execute<Program>(args);
+        private static Task Main(string[] args) => CommandLineApplication.ExecuteAsync<Program>(args);
 
         // ReSharper disable UnassignedGetOnlyAutoProperty
         [Argument(0, "file", "File to upload")]
@@ -29,7 +30,7 @@ namespace TusCli
         public double ChunkSize { get; } = 5;
         // ReSharper restore UnassignedGetOnlyAutoProperty
 
-        public int OnExecute()
+        public async Task<int> OnExecuteAsync()
         {
             var file = new FileInfo(FilePath);
             if (!file.Exists)
@@ -43,21 +44,22 @@ namespace TusCli
 
             var metadata = ParseMetadata(Metadata) ?? Array.Empty<(string, string)>();
 
-            var client = new TusClient(ChunkSize);
-            client.UploadProgress += OnUploadProgress;
+            var client = new TusClient();
 
             try
             {
                 var fileUrl = $"{Address}{fileInformation.ServerId}";
                 if (string.IsNullOrWhiteSpace(fileInformation.ServerId))
                 {
-                    fileUrl = client.Create(Address, file, metadata);
+                    fileUrl = await client.CreateAsync(Address, file.Length, metadata);
                     fileInformation.ServerId = fileUrl.Split('/').Last();
                 }
 
                 File.WriteAllText(infoFile.FullName, fileInformation.ToString());
                 
-                client.Upload(fileUrl, file);
+                var operation = client.UploadAsync(fileUrl, file, ChunkSize);
+                operation.Progressed += OnUploadProgress;
+                await operation;
                 
                 try
                 {
