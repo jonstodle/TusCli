@@ -42,18 +42,17 @@ namespace TusCli
             var infoFile = new FileInfo($"{file.FullName}.info");
             var fileInformation = FileInformation.Parse(TryReadAllText(infoFile.FullName) ?? "");
 
-            var metadata = ParseMetadata(Metadata) ?? Array.Empty<(string, string)>();
-
             var client = new TusClient();
 
             try
             {
-                var fileUrl = $"{Address}{fileInformation.ServerId}";
                 if (string.IsNullOrWhiteSpace(fileInformation.ServerId))
                 {
-                    fileUrl = await client.CreateAsync(Address, file.Length, metadata);
-                    fileInformation.ServerId = fileUrl.Split('/').Last();
+                    var metadata = ParseMetadata(Metadata) ?? Array.Empty<(string, string)>();
+                    var uploadUrl = await client.CreateAsync(Address, file.Length, metadata);
+                    fileInformation.ServerId = uploadUrl.Split('/').Last();
                 }
+                var fileUrl = $"{Address}{fileInformation.ServerId}";
 
                 File.WriteAllText(infoFile.FullName, fileInformation.ToString());
                 
