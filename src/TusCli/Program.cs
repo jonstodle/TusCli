@@ -112,8 +112,18 @@ namespace TusCli
                 .Select(md =>
                 {
                     var parts = md.Split('=');
-                    return (parts[0], parts[1]);
+                    if (parts.Length == 2)
+                        return (parts[0], parts[1]);
+
+                    var response =
+                        Prompt.GetString($"Unable to parse '{md}'. Do you want to [s]kip it or [a]bort?")
+                        ?? "a";
+                    if (!"skip".StartsWith(response, StringComparison.OrdinalIgnoreCase))
+                        throw new Exception("Aborted by user request.");
+                    
+                    return (null, null);
                 })
+                .Where(data => data.Item1 != null && data.Item2 != null)
                 .ToArray();
     }
 }
