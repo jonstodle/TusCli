@@ -1,19 +1,20 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <TargetFramework>netcoreapp2.1</TargetFramework>
-        <PackAsTool>true</PackAsTool>
-        <ToolCommandName>tus</ToolCommandName>
-        <PackageId>TusCli</PackageId>
-        <Authors>jonindico</Authors>
-        <Description>A cli tool for interacting with a Tus enabled server.</Description>
-        <RepositoryUrl>https://github.com/Jon-Indico/TusCli</RepositoryUrl>
-        <PackageProjectUrl>https://github.com/Jon-Indico/TusCli</PackageProjectUrl>
-        <License>MIT</License>
-        <LangVersion>latest</LangVersion>
-    </PropertyGroup>
-    <ItemGroup>
-        <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.2.5" />
-        <PackageReference Include="TusDotNetClient" Version="1.0.0" />
-    </ItemGroup>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Version>0.2.2</Version>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>tus</ToolCommandName>
+    <PackageId>TusCli</PackageId>
+    <Authors>jonindico</Authors>
+    <Description>A cli tool for interacting with a Tus enabled server.</Description>
+    <RepositoryUrl>https://github.com/Jon-Indico/TusCli</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/Jon-Indico/TusCli</PackageProjectUrl>
+    <License>MIT</License>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.2.5" />
+    <PackageReference Include="TusDotNetClient" Version="1.0.0" />
+  </ItemGroup>
 </Project>
