@@ -28,6 +28,9 @@ namespace TusCli
 
         [Option(Description = "The size (in MB) of each chunk when uploading (default: 5)")]
         public double ChunkSize { get; } = 5;
+
+        [Option("-h|--header", "Specify additional HTTP header to send. Can be specified multiple times. Format: Header-Name=HeaderValue", CommandOptionType.MultipleValue)]
+        public string[] Headers { get; } = Array.Empty<string>();
         // ReSharper restore UnassignedGetOnlyAutoProperty
 
         public async Task<int> OnExecuteAsync()
@@ -43,6 +46,8 @@ namespace TusCli
             var fileInformation = FileInformation.Parse(TryReadAllText(infoFile.FullName) ?? "");
 
             var client = new TusClient();
+            foreach (var (name, value) in ParseHeaders(Headers))
+                client.AdditionalHeaders.Add(name, value);
 
             try
             {
@@ -121,6 +126,18 @@ namespace TusCli
                         throw new Exception("Aborted by user request.");
                     
                     return (null, null);
+                })
+                .Where(data => data.Item1 != null && data.Item2 != null)
+                .ToArray();
+
+        private static (string, string)[] ParseHeaders(string[] headers) =>
+            headers
+                .Select(h =>
+                {
+                    var parts = h.Split('=', 2, StringSplitOptions.RemoveEmptyEntries);
+                    return parts.Length == 2
+                        ? (parts[0], parts[1]) 
+                        : (null, null);
                 })
                 .Where(data => data.Item1 != null && data.Item2 != null)
                 .ToArray();
