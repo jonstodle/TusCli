@@ -15,19 +15,28 @@ namespace TusCli
         private static Task Main(string[] args) => CommandLineApplication.ExecuteAsync<Program>(args);
 
         // ReSharper disable UnassignedGetOnlyAutoProperty
-        [Argument(0, "file", "File to upload")]
-        [Required]
-        public string FilePath { get; }
-
-        [Argument(1, "address", "The endpoint of the Tus server")]
+        [Argument(0, "address", "The endpoint of the Tus server")]
         [Required]
         public string Address { get; }
 
-        [Option(Description = "Additional metadata to submit. Format: key1=value1,key2=value2")]
-        public string Metadata { get; }
+        [Argument(1, "file", "File to upload")]
+        [Required]
+        public string FilePath { get; }
 
-        [Option(Description = "The size (in MB) of each chunk when uploading (default: 5)")]
+        [Option("-m|--metadata",
+            "Additional metadata to submit. Can be specified multiple times. Format: key=value",
+            CommandOptionType.MultipleValue)]
+        public string[] Metadata { get; } = Array.Empty<string>();
+
+        [Option("-c|--chunk-size",
+            "The size (in MB) of each chunk when uploading. Default: 5",
+            CommandOptionType.SingleValue)]
         public double ChunkSize { get; } = 5;
+
+        [Option("-h|--header",
+            "Specify additional HTTP header to send. Can be specified multiple times. Format: Header-Name=HeaderValue",
+            CommandOptionType.MultipleValue)]
+        public string[] Headers { get; } = Array.Empty<string>();
         // ReSharper restore UnassignedGetOnlyAutoProperty
 
         public async Task<int> OnExecuteAsync()
@@ -43,23 +52,26 @@ namespace TusCli
             var fileInformation = FileInformation.Parse(TryReadAllText(infoFile.FullName) ?? "");
 
             var client = new TusClient();
+            foreach (var (name, value) in ParseKeyValuePairs(Headers))
+                client.AdditionalHeaders.Add(name, value);
 
             try
             {
                 if (string.IsNullOrWhiteSpace(fileInformation.ServerId))
                 {
-                    var metadata = ParseMetadata(Metadata) ?? Array.Empty<(string, string)>();
+                    var metadata = ParseKeyValuePairs(Metadata);
                     var uploadUrl = await client.CreateAsync(Address, file.Length, metadata);
                     fileInformation.ServerId = uploadUrl.Split('/').Last();
                 }
+
                 var fileUrl = $"{Address}{fileInformation.ServerId}";
 
                 File.WriteAllText(infoFile.FullName, fileInformation.ToString());
-                
+
                 var operation = client.UploadAsync(fileUrl, file, ChunkSize);
                 operation.Progressed += OnUploadProgress;
                 await operation;
-                
+
                 try
                 {
                     infoFile.Delete();
@@ -105,24 +117,23 @@ namespace TusCli
             }
         }
 
-        private static (string, string)[] ParseMetadata(string metadata) =>
-            metadata?
-                .Split(',')
-                .Select(md =>
+        private static (string, string)[] ParseKeyValuePairs(string[] keyValuePairs) =>
+            keyValuePairs
+                .Select(kvp =>
                 {
-                    var parts = md.Split('=');
+                    var parts = kvp.Split('=', 2);
                     if (parts.Length == 2)
                         return (parts[0], parts[1]);
 
                     var response =
-                        Prompt.GetString($"Unable to parse '{md}'. Do you want to [s]kip it or [a]bort?")
+                        Prompt.GetString($"Unable to parse '{kvp}'. Do you want to [s]kip it or [a]bort?")
                         ?? "a";
                     if (!"skip".StartsWith(response, StringComparison.OrdinalIgnoreCase))
                         throw new Exception("Aborted by user request.");
-                    
+
                     return (null, null);
                 })
-                .Where(data => data.Item1 != null && data.Item2 != null)
+                .Where(kvp => kvp.Item1 != null && kvp.Item2 != null)
                 .ToArray();
     }
 }
